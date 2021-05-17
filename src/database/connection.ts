@@ -1,6 +1,16 @@
-import { Sequelize } from 'sequelize';
+import { Sequelize, Options as SequelizeOptions } from 'sequelize';
 
-// eslint-disable-next-line @typescript-eslint/no-non-null-assertion
-const sequelize = new Sequelize(process.env.DB_URI!);
+const sequelize = (): Sequelize => {
+  try {
+    if (!process.env.DB_URI) throw new Error();
 
-export default sequelize;
+    const options: SequelizeOptions =
+      process.env.ENV === 'test' ? { logging: false } : {};
+
+    return new Sequelize(process.env.DB_URI, options);
+  } catch (error) {
+    throw new Error('Invalid database URI');
+  }
+};
+
+export default sequelize();

@@ -41,21 +41,23 @@ module.exports = {
       username: {
         type: Sequelize.STRING(30),
         allowNull: false,
+        unique: true,
       },
       email: {
         type: Sequelize.STRING(30),
         allowNull: false,
+        unique: true,
       },
       password: {
-        type: Sequelize.STRING(50),
+        type: Sequelize.STRING(100),
         allowNull: false,
       },
-      created_at: {
+      createdAt: {
         type: Sequelize.DATE,
         allowNull: false,
         defaultValue: Sequelize.fn('now'),
       },
-      updated_at: {
+      updatedAt: {
         type: Sequelize.DATE,
         allowNull: false,
         defaultValue: Sequelize.fn('now'),
@@ -63,13 +65,7 @@ module.exports = {
     });
   },
 
-  down: async (queryInterface, Sequelize) => {
-    /**
-     * Add reverting commands here.
-     *
-     * Example:
-     * await queryInterface.dropTable('users');
-     */
+  down: async (queryInterface) => {
     await queryInterface.dropTable('users');
   },
 };

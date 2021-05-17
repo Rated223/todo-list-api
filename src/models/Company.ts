@@ -1,15 +1,5 @@
-import {
-  Model,
-  DataTypes,
-  Optional,
-  HasManyGetAssociationsMixin,
-  HasManyAddAssociationMixin,
-  HasManyHasAssociationMixin,
-  HasManyCountAssociationsMixin,
-  HasManyCreateAssociationMixin,
-} from 'sequelize';
+import { Model, ModelStatic, DataTypes, Optional, HasMany } from 'sequelize';
 import sequelize from '../database/connection';
-import { User } from './index';
 
 interface CompanyAttributes {
   id: number;
@@ -17,25 +7,35 @@ interface CompanyAttributes {
   email: string;
   phone: string | null;
   web: string | null;
+  users?: Record<string, unknown>[] | null;
 }
 
-interface CompanyCreationAttributes extends Optional<CompanyAttributes, 'id'> {}
+export interface CompanyCreationAttributes
+  extends Optional<CompanyAttributes, 'id'> {}
+
+interface CompanyAssociateModels {
+  User: ModelStatic<Model>;
+}
 
 class Company extends Model<CompanyAttributes, CompanyCreationAttributes>
   implements CompanyAttributes {
-  id!: number;
-  name!: string;
-  email!: string;
-  phone!: string | null;
-  web!: string | null;
+  public id!: number;
+  public name!: string;
+  public email!: string;
+  public phone!: string | null;
+  public web!: string | null;
   public readonly createdAt!: Date;
   public readonly updatedAt!: Date;
 
-  public getUsers!: HasManyGetAssociationsMixin<User>;
-  public addUser!: HasManyAddAssociationMixin<User, number>;
-  public hasUser!: HasManyHasAssociationMixin<User, number>;
-  public countUsers!: HasManyCountAssociationsMixin;
-  public createUser!: HasManyCreateAssociationMixin<User>;
+  static Users: HasMany;
+
+  public static associate(models: CompanyAssociateModels): void {
+    this.Users = Company.hasMany(models.User, {
+      sourceKey: 'id',
+      foreignKey: 'companyId',
+      as: 'users',
+    });
+  }
 }
 
 Company.init(
@@ -67,7 +67,5 @@ Company.init(
     sequelize,
   }
 );
-
-Company.hasMany(User, { foreignKey: 'companyId' });
 
 export default Company;

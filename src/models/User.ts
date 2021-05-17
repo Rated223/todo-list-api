@@ -1,11 +1,8 @@
-import { Model, DataTypes, Optional } from 'sequelize';
+import bcrypt from 'bcrypt';
+import { Model, ModelStatic, DataTypes, Optional, BelongsTo } from 'sequelize';
 import sequelize from '../database/connection';
-import { Company } from './index';
 
-enum UserRoles {
-  ADMIN = 'ADMIN',
-  NORMAL = 'NORMAL',
-}
+type UserRoles = 'ADMIN' | 'NORMAL';
 
 interface UserAttributes {
   id: number;
@@ -18,13 +15,18 @@ interface UserAttributes {
   password: string;
 }
 
-interface UserCreationAttributes extends Optional<UserAttributes, 'id'> {}
+export interface UserCreationAttributes
+  extends Optional<UserAttributes, 'id'> {}
+
+interface UserAssociateModels {
+  Company: ModelStatic<Model>;
+}
 
 class User extends Model<UserAttributes, UserCreationAttributes>
   implements UserAttributes {
   public id!: number;
   public companyId!: number;
-  public role!: UserRoles.NORMAL;
+  public role!: UserRoles;
   public firstName!: string;
   public lastName!: string;
   public username!: string;
@@ -32,6 +34,19 @@ class User extends Model<UserAttributes, UserCreationAttributes>
   public readonly password!: string;
   public readonly createdAt!: Date;
   public readonly updatedAt!: Date;
+
+  static Company: BelongsTo;
+
+  public static associate(models: UserAssociateModels): void {
+    this.Company = User.belongsTo(models.Company, {
+      foreignKey: 'companyId',
+      targetKey: 'id',
+    });
+  }
+
+  public async validPassword(password: string): Promise<boolean> {
+    return await bcrypt.compare(password, this.password);
+  }
 }
 
 User.init(
@@ -48,10 +63,10 @@ User.init(
     },
     role: {
       type: DataTypes.ENUM({
-        values: Object.values(UserRoles),
+        values: ['ADMIN', 'NORMAL'],
       }),
       allowNull: false,
-      defaultValue: UserRoles.NORMAL,
+      defaultValue: 'NORMAL',
     },
     firstName: {
       type: DataTypes.STRING(30),
@@ -72,6 +87,9 @@ User.init(
     password: {
       type: DataTypes.STRING(50),
       allowNull: false,
+      set(pass: string) {
+        this.setDataValue('password', bcrypt.hashSync(pass, 8));
+      },
     },
   },
   {
@@ -79,7 +97,5 @@ User.init(
     sequelize,
   }
 );
-
-User.belongsTo(Company, { foreignKey: 'companyId' });
 
 export default User;
