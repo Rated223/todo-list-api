@@ -2,7 +2,7 @@ import bcrypt from 'bcrypt';
 import { Model, ModelStatic, DataTypes, Optional, BelongsTo } from 'sequelize';
 import sequelize from '../database/connection';
 
-type UserRoles = 'ADMIN' | 'NORMAL';
+export type UserRoles = 'ADMIN' | 'NORMAL';
 
 interface UserAttributes {
   id: number;

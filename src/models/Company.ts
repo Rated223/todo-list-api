@@ -46,7 +46,7 @@ Company.init(
       primaryKey: true,
     },
     name: {
-      type: DataTypes.STRING(30),
+      type: DataTypes.STRING(100),
       allowNull: false,
     },
     email: {
