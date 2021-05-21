@@ -1,6 +1,14 @@
 import bcrypt from 'bcrypt';
-import { Model, ModelStatic, DataTypes, Optional, BelongsTo } from 'sequelize';
+import {
+  Model,
+  ModelStatic,
+  DataTypes,
+  Optional,
+  BelongsTo,
+  BelongsToMany,
+} from 'sequelize';
 import sequelize from '../database/connection';
+import UserPermission from './UserPermission';
 
 export type UserRoles = 'ADMIN' | 'NORMAL';
 
@@ -20,6 +28,8 @@ export interface UserCreationAttributes
 
 interface UserAssociateModels {
   Company: ModelStatic<Model>;
+  Project: ModelStatic<Model>;
+  Permission: ModelStatic<Model>;
 }
 
 class User extends Model<UserAttributes, UserCreationAttributes>
@@ -36,11 +46,21 @@ class User extends Model<UserAttributes, UserCreationAttributes>
   public readonly updatedAt!: Date;
 
   static Company: BelongsTo;
+  static Projects: BelongsToMany;
+  static Permissions: BelongsToMany;
 
   public static associate(models: UserAssociateModels): void {
     this.Company = User.belongsTo(models.Company, {
       foreignKey: 'companyId',
       targetKey: 'id',
+    });
+    this.Projects = User.belongsToMany(models.Project, {
+      through: { model: UserPermission, unique: false },
+      foreignKey: 'projectId',
+    });
+    this.Permissions = User.belongsToMany(models.Permission, {
+      through: { model: UserPermission, unique: false },
+      foreignKey: 'permissionId',
     });
   }
 
@@ -85,7 +105,7 @@ User.init(
       allowNull: false,
     },
     password: {
-      type: DataTypes.STRING(50),
+      type: DataTypes.STRING(100),
       allowNull: false,
       set(pass: string) {
         this.setDataValue('password', bcrypt.hashSync(pass, 8));

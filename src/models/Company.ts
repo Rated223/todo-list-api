@@ -15,6 +15,7 @@ export interface CompanyCreationAttributes
 
 interface CompanyAssociateModels {
   User: ModelStatic<Model>;
+  Project: ModelStatic<Model>;
 }
 
 class Company extends Model<CompanyAttributes, CompanyCreationAttributes>
@@ -28,12 +29,18 @@ class Company extends Model<CompanyAttributes, CompanyCreationAttributes>
   public readonly updatedAt!: Date;
 
   static Users: HasMany;
+  static Projects: HasMany;
 
   public static associate(models: CompanyAssociateModels): void {
     this.Users = Company.hasMany(models.User, {
       sourceKey: 'id',
       foreignKey: 'companyId',
       as: 'users',
+    });
+    this.Projects = Company.hasMany(models.Project, {
+      sourceKey: 'id',
+      foreignKey: 'companyId',
+      as: 'projects',
     });
   }
 }

@@ -6,7 +6,9 @@
   "scripts": {
     "start": "nodemon -e js,ts -x env-cmd -f ./configs/dev.env ts-node ./src/index.ts",
     "build": "tsc -b",
-    "test": "env-cmd -f ./configs/test.env jest --runInBand --detectOpenHandles"
+    "test": "env-cmd -f ./configs/test.env jest --runInBand --detectOpenHandles",
+    "dev:sync": "env-cmd -f ./configs/dev.env ts-node ./src/database/sync.ts",
+    "test:sync": "env-cmd -f ./configs/test.env ts-node ./src/database/sync.ts"
   },
   "files": [],
   "author": "rated223",
