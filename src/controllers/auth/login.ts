@@ -21,7 +21,7 @@ const login: RequestHandler = async (req, res) => {
           email: username,
         },
       },
-      include: [User.Company],
+      include: [User.associations.Company],
     });
 
     if (user === null || !(await user.validPassword(password))) {

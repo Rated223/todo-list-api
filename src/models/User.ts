@@ -1,6 +1,20 @@
 import bcrypt from 'bcrypt';
-import { Model, ModelStatic, DataTypes, Optional, BelongsTo } from 'sequelize';
+import {
+  Model,
+  ModelStatic,
+  DataTypes,
+  Optional,
+  BelongsTo,
+  BelongsToMany,
+  HasMany,
+  Op,
+  Sequelize,
+} from 'sequelize';
 import sequelize from '../database/connection';
+import Company from './Company';
+import Permission from './Permission';
+import Project from './Project';
+import UserPermission, { UserPermissionAttributes } from './UserPermission';
 
 export type UserRoles = 'ADMIN' | 'NORMAL';
 
@@ -15,11 +29,15 @@ interface UserAttributes {
   password: string;
 }
 
-export interface UserCreationAttributes
-  extends Optional<UserAttributes, 'id'> {}
+export interface UserCreationAttributes extends Optional<UserAttributes, 'id'> {
+  permissions?: Omit<UserPermissionAttributes, 'userId'>[] | null;
+}
 
 interface UserAssociateModels {
-  Company: ModelStatic<Model>;
+  Company: ModelStatic<Company>;
+  Project: ModelStatic<Project>;
+  Permission: ModelStatic<Permission>;
+  UserPermission: ModelStatic<UserPermission>;
 }
 
 class User extends Model<UserAttributes, UserCreationAttributes>
@@ -35,12 +53,66 @@ class User extends Model<UserAttributes, UserCreationAttributes>
   public readonly createdAt!: Date;
   public readonly updatedAt!: Date;
 
-  static Company: BelongsTo;
+  public readonly Company?: Company;
+  public readonly Projects?: Project[];
+  public readonly Permissions?: Permission[];
+  public static associations: {
+    Company: BelongsTo;
+    Projects: BelongsToMany;
+    Permissions: BelongsToMany;
+    UserPermissions: HasMany;
+  };
 
   public static associate(models: UserAssociateModels): void {
-    this.Company = User.belongsTo(models.Company, {
+    this.associations.Company = User.belongsTo(models.Company, {
       foreignKey: 'companyId',
       targetKey: 'id',
+    });
+    this.associations.Projects = User.belongsToMany(models.Project, {
+      through: { model: UserPermission, unique: false },
+      foreignKey: 'userId',
+      otherKey: 'projectId',
+    });
+    this.associations.Permissions = User.belongsToMany(models.Permission, {
+      through: { model: UserPermission, unique: false },
+      foreignKey: 'userId',
+      otherKey: 'permissionId',
+    });
+    this.associations.UserPermissions = User.hasMany(models.UserPermission, {
+      sourceKey: 'id',
+      foreignKey: 'userId',
+      as: 'permissions',
+    });
+  }
+
+  public static addScopes(): void {
+    User.addScope('withProjects', {
+      include: {
+        association: User.associations.Projects,
+        through: { attributes: [] },
+        include: [
+          {
+            association: Project.associations.Permissions,
+            through: { attributes: [] },
+            include: [
+              {
+                association: Permission.associations.Users,
+                required: false,
+                through: { attributes: [] },
+                attributes: [],
+                where: {
+                  id: { [Op.col]: 'User.id' },
+                },
+              },
+            ],
+          },
+        ],
+      },
+      where: Sequelize.where(
+        Sequelize.col('`Projects->Permissions->Users`.`id`'),
+        Op.not,
+        null
+      ),
     });
   }
 
@@ -85,7 +157,7 @@ User.init(
       allowNull: false,
     },
     password: {
-      type: DataTypes.STRING(50),
+      type: DataTypes.STRING(100),
       allowNull: false,
       set(pass: string) {
         this.setDataValue('password', bcrypt.hashSync(pass, 8));

@@ -1,15 +1,21 @@
-import User, { UserCreationAttributes } from './User';
+import User, { UserCreationAttributes, UserRoles } from './User';
+import Project from './Project';
+import Permission from './Permission';
 import setDatabase from '../tests/fixtures/setDatabase';
 import faker from 'faker';
 
+let project1: Project, permission1: Permission;
+
 beforeEach(async () => {
-  await setDatabase();
+  const { projects, permissions } = await setDatabase();
+  project1 = projects.project1;
+  permission1 = permissions.permission1;
 });
 
 test('Should create 2 new users of each role', async () => {
   const newUser1Data: UserCreationAttributes = {
-    companyId: 1,
-    role: 'ADMIN',
+    companyId: project1.id,
+    role: 'ADMIN' as UserRoles,
     firstName: faker.name.findName(),
     lastName: faker.name.lastName(),
     username: faker.internet.userName(),
@@ -17,8 +23,8 @@ test('Should create 2 new users of each role', async () => {
     password: faker.internet.password(),
   };
   const newUser2Data: UserCreationAttributes = {
-    companyId: 1,
-    role: 'NORMAL',
+    companyId: project1.id,
+    role: 'NORMAL' as UserRoles,
     firstName: faker.name.findName(),
     lastName: faker.name.lastName(),
     username: faker.internet.userName(),
@@ -43,6 +49,63 @@ test('Should create 2 new users of each role', async () => {
 
   expect(newUser2).toMatchObject(user2DataToCheck);
   expect(await newUser2?.validPassword(user2Password)).toBe(true);
+});
+
+test('Should create a user with permissions', async () => {
+  const newUserData: UserCreationAttributes = {
+    companyId: project1.id,
+    role: 'NORMAL' as UserRoles,
+    firstName: faker.name.findName(),
+    lastName: faker.name.lastName(),
+    username: faker.internet.userName(),
+    email: faker.internet.email(),
+    password: faker.internet.password(),
+  };
+
+  const { id: newUserId } = await User.create(
+    {
+      ...newUserData,
+      permissions: [
+        {
+          projectId: project1.id,
+          permissionId: permission1.id,
+        },
+      ],
+    },
+    {
+      include: [User.associations.UserPermissions],
+    }
+  );
+
+  const newUser = await User.findByPk(newUserId, {
+    include: [
+      {
+        association: User.associations.Projects,
+        attributes: { exclude: ['createdAt', 'updatedAt'] },
+      },
+      {
+        association: User.associations.Permissions,
+        attributes: { exclude: ['createdAt', 'updatedAt'] },
+      },
+    ],
+  });
+
+  if (!newUser || !newUser.Projects || !newUser.Permissions)
+    throw new Error('No register for user');
+
+  const associateProject = newUser.Projects.pop();
+  const associatePermission = newUser.Permissions.pop();
+
+  if (!associateProject) throw new Error('No project associate.');
+  if (!associatePermission) throw new Error('No permission associate.');
+
+  expect(project1.id).toBe(associateProject.id);
+  expect(project1.companyId).toBe(associateProject.companyId);
+  expect(project1.name).toBe(associateProject.name);
+  expect(project1.description).toBe(associateProject.description);
+
+  expect(permission1.id).toBe(associatePermission.id);
+  expect(permission1.description).toBe(associatePermission.description);
 });
 
 test('Should update a user', async () => {

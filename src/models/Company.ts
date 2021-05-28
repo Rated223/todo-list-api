@@ -1,5 +1,7 @@
 import { Model, ModelStatic, DataTypes, Optional, HasMany } from 'sequelize';
 import sequelize from '../database/connection';
+import Project from './Project';
+import User, { UserCreationAttributes } from './User';
 
 interface CompanyAttributes {
   id: number;
@@ -7,14 +9,16 @@ interface CompanyAttributes {
   email: string;
   phone: string | null;
   web: string | null;
-  users?: Record<string, unknown>[] | null;
 }
 
 export interface CompanyCreationAttributes
-  extends Optional<CompanyAttributes, 'id'> {}
+  extends Optional<CompanyAttributes, 'id'> {
+  users?: Omit<UserCreationAttributes, 'companyId'>[] | null;
+}
 
 interface CompanyAssociateModels {
-  User: ModelStatic<Model>;
+  User: ModelStatic<User>;
+  Project: ModelStatic<Project>;
 }
 
 class Company extends Model<CompanyAttributes, CompanyCreationAttributes>
@@ -27,13 +31,23 @@ class Company extends Model<CompanyAttributes, CompanyCreationAttributes>
   public readonly createdAt!: Date;
   public readonly updatedAt!: Date;
 
-  static Users: HasMany;
+  public readonly Users?: User[];
+  public readonly Projects?: Project[];
+  public static associations: {
+    Users: HasMany;
+    Projects: HasMany;
+  };
 
   public static associate(models: CompanyAssociateModels): void {
-    this.Users = Company.hasMany(models.User, {
+    this.associations.Users = Company.hasMany(models.User, {
       sourceKey: 'id',
       foreignKey: 'companyId',
       as: 'users',
+    });
+    this.associations.Projects = Company.hasMany(models.Project, {
+      sourceKey: 'id',
+      foreignKey: 'companyId',
+      as: 'projects',
     });
   }
 }

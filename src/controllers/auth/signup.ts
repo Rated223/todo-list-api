@@ -38,7 +38,7 @@ const signup: RequestHandler = async (req, res) => {
         ],
       },
       {
-        include: [Company.Users],
+        include: [Company.associations.Users],
       }
     );
 
