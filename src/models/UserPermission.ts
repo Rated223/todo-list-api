@@ -1,5 +1,8 @@
 import { Model, ModelStatic, DataTypes, BelongsTo } from 'sequelize';
 import sequelize from '../database/connection';
+import Permission from './Permission';
+import Project from './Project';
+import User from './User';
 
 export interface UserPermissionAttributes {
   projectId: number;
@@ -8,9 +11,9 @@ export interface UserPermissionAttributes {
 }
 
 interface UserPermissionAssociateModels {
-  Project: ModelStatic<Model>;
-  User: ModelStatic<Model>;
-  Permission: ModelStatic<Model>;
+  Project: ModelStatic<Project>;
+  User: ModelStatic<User>;
+  Permission: ModelStatic<Permission>;
 }
 
 class UserPermission extends Model {
@@ -20,20 +23,25 @@ class UserPermission extends Model {
   public readonly createdAt!: Date;
   public readonly updatedAt!: Date;
 
-  static Projects: BelongsTo;
-  static Users: BelongsTo;
-  static Permissions: BelongsTo;
+  public readonly Project!: Project;
+  public readonly User!: User;
+  public readonly Permission!: Permission;
+  public static associations: {
+    Project: BelongsTo;
+    User: BelongsTo;
+    Permission: BelongsTo;
+  };
 
   public static associate(models: UserPermissionAssociateModels): void {
-    this.Projects = UserPermission.belongsTo(models.Project, {
+    this.associations.Project = UserPermission.belongsTo(models.Project, {
       foreignKey: 'projectId',
       targetKey: 'id',
     });
-    this.Users = UserPermission.belongsTo(models.User, {
+    this.associations.User = UserPermission.belongsTo(models.User, {
       foreignKey: 'userId',
       targetKey: 'id',
     });
-    this.Permissions = UserPermission.belongsTo(models.Permission, {
+    this.associations.Permission = UserPermission.belongsTo(models.Permission, {
       foreignKey: 'permissionId',
       targetKey: 'id',
     });

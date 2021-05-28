@@ -1,6 +1,7 @@
 import app from '../../app';
 import { LoginBody } from './login';
-import setDatabase, { user1Data } from '../../tests/fixtures/setDatabase';
+import setDatabase from '../../tests/fixtures/setDatabase';
+import { user1Data } from '../../tests/data';
 import faker from 'faker';
 import request from 'supertest';
 

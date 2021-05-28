@@ -4,8 +4,11 @@ import {
   DataTypes,
   Optional,
   BelongsToMany,
+  HasMany,
 } from 'sequelize';
 import sequelize from '../database/connection';
+import Project from './Project';
+import User from './User';
 import UserPermission from './UserPermission';
 
 interface PermissionAttributes {
@@ -17,8 +20,9 @@ export interface PermissionCreationAttributes
   extends Optional<PermissionAttributes, 'id'> {}
 
 interface PermissionAssociateModels {
-  User: ModelStatic<Model>;
-  Project: ModelStatic<Model>;
+  User: ModelStatic<User>;
+  Project: ModelStatic<Project>;
+  UserPermission: ModelStatic<UserPermission>;
 }
 
 class Permission
@@ -29,18 +33,32 @@ class Permission
   public readonly createdAt!: Date;
   public readonly updatedAt!: Date;
 
-  static Users: BelongsToMany;
-  static Projects: BelongsToMany;
+  public readonly Users?: User[];
+  public readonly Projects?: Project[];
+  public static associations: {
+    Users: BelongsToMany;
+    Projects: BelongsToMany;
+    UserPermissions: HasMany;
+  };
 
   public static associate(models: PermissionAssociateModels): void {
-    this.Users = Permission.belongsToMany(models.User, {
+    this.associations.Users = Permission.belongsToMany(models.User, {
       through: { model: UserPermission, unique: false },
-      foreignKey: 'userId',
+      foreignKey: 'permissionId',
+      otherKey: 'userId',
     });
-    this.Projects = Permission.belongsToMany(models.Project, {
+    this.associations.Projects = Permission.belongsToMany(models.Project, {
       through: { model: UserPermission, unique: false },
-      foreignKey: 'projectId',
+      foreignKey: 'permissionId',
+      otherKey: 'projectId',
     });
+    this.associations.UserPermissions = Permission.hasMany(
+      models.UserPermission,
+      {
+        sourceKey: 'id',
+        foreignKey: 'permissionId',
+      }
+    );
   }
 }
 
