@@ -1,15 +1,15 @@
 import User, { UserCreationAttributes, UserRoles } from './User';
 import Project from './Project';
-import Permission from './Permission';
+import ProjectPermission from './ProjectPermission';
 import setDatabase from '../tests/fixtures/setDatabase';
 import faker from 'faker';
 
-let project1: Project, permission1: Permission;
+let project1: Project, projectPermission1: ProjectPermission;
 
 beforeEach(async () => {
-  const { projects, permissions } = await setDatabase();
+  const { projects, projectPermissions } = await setDatabase();
   project1 = projects.project1;
-  permission1 = permissions.permission1;
+  projectPermission1 = projectPermissions.projectPermission1;
 });
 
 test('Should create 2 new users of each role', async () => {
@@ -65,15 +65,15 @@ test('Should create a user with permissions', async () => {
   const { id: newUserId } = await User.create(
     {
       ...newUserData,
-      permissions: [
+      projectPermissions: [
         {
           projectId: project1.id,
-          permissionId: permission1.id,
+          permissionId: projectPermission1.id,
         },
       ],
     },
     {
-      include: [User.associations.UserPermissions],
+      include: [User.associations.UserProjectPermissions],
     }
   );
 
@@ -84,17 +84,17 @@ test('Should create a user with permissions', async () => {
         attributes: { exclude: ['createdAt', 'updatedAt'] },
       },
       {
-        association: User.associations.Permissions,
+        association: User.associations.ProjectPermissions,
         attributes: { exclude: ['createdAt', 'updatedAt'] },
       },
     ],
   });
 
-  if (!newUser || !newUser.Projects || !newUser.Permissions)
+  if (!newUser || !newUser.Projects || !newUser.ProjectPermissions)
     throw new Error('No register for user');
 
   const associateProject = newUser.Projects.pop();
-  const associatePermission = newUser.Permissions.pop();
+  const associatePermission = newUser.ProjectPermissions.pop();
 
   if (!associateProject) throw new Error('No project associate.');
   if (!associatePermission) throw new Error('No permission associate.');
@@ -104,8 +104,8 @@ test('Should create a user with permissions', async () => {
   expect(project1.name).toBe(associateProject.name);
   expect(project1.description).toBe(associateProject.description);
 
-  expect(permission1.id).toBe(associatePermission.id);
-  expect(permission1.description).toBe(associatePermission.description);
+  expect(projectPermission1.id).toBe(associatePermission.id);
+  expect(projectPermission1.description).toBe(associatePermission.description);
 });
 
 test('Should update a user', async () => {

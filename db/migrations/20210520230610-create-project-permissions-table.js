@@ -2,7 +2,7 @@
 
 module.exports = {
   up: async (queryInterface, Sequelize) => {
-    await queryInterface.createTable('permissions', {
+    await queryInterface.createTable('project_permissions', {
       id: {
         type: Sequelize.INTEGER.UNSIGNED,
         allowNull: false,
@@ -27,6 +27,6 @@ module.exports = {
   },
 
   down: async (queryInterface) => {
-    await queryInterface.dropTable('permissions');
+    await queryInterface.dropTable('project_permissions');
   },
 };

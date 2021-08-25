@@ -35,14 +35,14 @@ export const project2Data = {
   name: 'Project 2',
 };
 
-export const permission1Data = {
-  description: 'description for permission 1',
+export const projectPermission1Data = {
+  description: 'description for project permission 1',
 };
 
-export const permission2Data = {
-  description: 'description for permission 2',
+export const projectPermission2Data = {
+  description: 'description for project permission 2',
 };
 
-export const permission3Data = {
-  description: 'description for permission 3',
+export const projectPermission3Data = {
+  description: 'description for project permission 3',
 };

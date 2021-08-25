@@ -1,4 +1,4 @@
-import { Company, User, Permission, Project } from '../../models';
+import { Company, User, ProjectPermission, Project } from '../../models';
 import sequelize from '../../database/connection';
 import {
   company1Data,
@@ -6,16 +6,16 @@ import {
   user2Data,
   project1Data,
   project2Data,
-  permission1Data,
-  permission2Data,
-  permission3Data,
+  projectPermission1Data,
+  projectPermission2Data,
+  projectPermission3Data,
 } from '../data';
 
 interface setDatabaseResult {
   companies: Record<string, Company>;
   users: Record<string, User>;
   projects: Record<string, Project>;
-  permissions: Record<string, Permission>;
+  projectPermissions: Record<string, ProjectPermission>;
 }
 
 const setDatabase = async (): Promise<setDatabaseResult> => {
@@ -31,13 +31,13 @@ const setDatabase = async (): Promise<setDatabaseResult> => {
     ]);
 
     const [
-      permission1,
-      permission2,
-      permission3,
-    ] = await Permission.bulkCreate([
-      permission1Data,
-      permission2Data,
-      permission3Data,
+      projectPermission1,
+      projectPermission2,
+      projectPermission3,
+    ] = await ProjectPermission.bulkCreate([
+      projectPermission1Data,
+      projectPermission2Data,
+      projectPermission3Data,
     ]);
 
     const [user1, user2] = await User.bulkCreate(
@@ -45,34 +45,34 @@ const setDatabase = async (): Promise<setDatabaseResult> => {
         {
           companyId: company1.id,
           ...user1Data,
-          permissions: [
+          projectPermissions: [
             {
               projectId: project1.id,
-              permissionId: permission2.id,
+              permissionId: projectPermission2.id,
             },
             {
               projectId: project2.id,
-              permissionId: permission3.id,
+              permissionId: projectPermission3.id,
             },
           ],
         },
         {
           companyId: company1.id,
           ...user2Data,
-          permissions: [
+          projectPermissions: [
             {
               projectId: project2.id,
-              permissionId: permission1.id,
+              permissionId: projectPermission1.id,
             },
             {
               projectId: project2.id,
-              permissionId: permission3.id,
+              permissionId: projectPermission3.id,
             },
           ],
         },
       ],
       {
-        include: [User.associations.UserPermissions],
+        include: [User.associations.UserProjectPermissions],
       }
     );
 
@@ -90,10 +90,10 @@ const setDatabase = async (): Promise<setDatabaseResult> => {
         project1,
         project2,
       },
-      permissions: {
-        permission1,
-        permission2,
-        permission3,
+      projectPermissions: {
+        projectPermission1,
+        projectPermission2,
+        projectPermission3,
       },
     };
   } catch (error) {

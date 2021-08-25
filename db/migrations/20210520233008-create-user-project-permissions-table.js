@@ -2,7 +2,7 @@
 
 module.exports = {
   up: async (queryInterface, Sequelize) => {
-    await queryInterface.createTable('user_permissions', {
+    await queryInterface.createTable('user_project_permissions', {
       projectId: {
         type: Sequelize.INTEGER.UNSIGNED,
         primaryKey: true,
@@ -26,7 +26,7 @@ module.exports = {
         primaryKey: true,
         allowNull: false,
         references: {
-          model: 'permissions',
+          model: 'project_permissions',
           key: 'id',
         },
       },
@@ -44,6 +44,6 @@ module.exports = {
   },
 
   down: async (queryInterface) => {
-    await queryInterface.dropTable('user_permissions');
+    await queryInterface.dropTable('user_project_permissions');
   },
 };

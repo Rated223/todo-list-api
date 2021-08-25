@@ -11,9 +11,9 @@ import {
 } from 'sequelize';
 import sequelize from '../database/connection';
 import Company from './Company';
-import Permission from './Permission';
+import ProjectPermission from './ProjectPermission';
 import User from './User';
-import UserPermission from './UserPermission';
+import UserProjectPermission from './UserProjectPermission';
 
 interface ProjectAttributes {
   id: number;
@@ -28,8 +28,8 @@ export interface ProjectCreationAttributes
 interface ProjectAssociateModels {
   Company: ModelStatic<Company>;
   User: ModelStatic<User>;
-  Permission: ModelStatic<Permission>;
-  UserPermission: ModelStatic<UserPermission>;
+  ProjectPermission: ModelStatic<ProjectPermission>;
+  UserProjectPermission: ModelStatic<UserProjectPermission>;
 }
 
 class Project extends Model<ProjectAttributes, ProjectCreationAttributes>
@@ -43,12 +43,12 @@ class Project extends Model<ProjectAttributes, ProjectCreationAttributes>
 
   public readonly Company?: Company;
   public readonly Users?: User[];
-  public readonly Permissions?: Permission[];
+  public readonly ProjectPermissions?: ProjectPermission[];
   public static associations: {
     Company: BelongsTo;
     Users: BelongsToMany;
-    Permissions: BelongsToMany;
-    UserPermissions: HasMany;
+    ProjectPermissions: BelongsToMany;
+    UserProjectPermission: HasMany;
   };
 
   public static associate(models: ProjectAssociateModels): void {
@@ -57,19 +57,25 @@ class Project extends Model<ProjectAttributes, ProjectCreationAttributes>
       targetKey: 'id',
     });
     this.associations.Users = Project.belongsToMany(models.User, {
-      through: { model: UserPermission, unique: false },
+      through: { model: UserProjectPermission, unique: false },
       foreignKey: 'projectId',
       otherKey: 'userId',
     });
-    this.associations.Permissions = Project.belongsToMany(models.Permission, {
-      through: { model: UserPermission, unique: false },
-      foreignKey: 'projectId',
-      otherKey: 'permissionId',
-    });
-    this.associations.UserPermissions = Project.hasMany(models.UserPermission, {
-      sourceKey: 'id',
-      foreignKey: 'projectId',
-    });
+    this.associations.ProjectPermissions = Project.belongsToMany(
+      models.ProjectPermission,
+      {
+        through: { model: UserProjectPermission, unique: false },
+        foreignKey: 'projectId',
+        otherKey: 'permissionId',
+      }
+    );
+    this.associations.UserProjectPermission = Project.hasMany(
+      models.UserProjectPermission,
+      {
+        sourceKey: 'id',
+        foreignKey: 'projectId',
+      }
+    );
   }
 
   public static addScopes(): void {
@@ -79,11 +85,11 @@ class Project extends Model<ProjectAttributes, ProjectCreationAttributes>
         through: { attributes: [] },
         include: [
           {
-            association: User.associations.Permissions,
+            association: User.associations.ProjectPermissions,
             through: { attributes: [] },
             include: [
               {
-                association: Permission.associations.Projects,
+                association: ProjectPermission.associations.Projects,
                 required: false,
                 through: { attributes: [] },
                 attributes: [],
@@ -96,7 +102,7 @@ class Project extends Model<ProjectAttributes, ProjectCreationAttributes>
         ],
       },
       where: Sequelize.where(
-        Sequelize.col('`Users->Permissions->Projects`.`id`'),
+        Sequelize.col('`Users->ProjectPermissions->Projects`.`id`'),
         Op.not,
         null
       ),

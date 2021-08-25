@@ -1,22 +1,22 @@
 import { Model, ModelStatic, DataTypes, BelongsTo } from 'sequelize';
 import sequelize from '../database/connection';
-import Permission from './Permission';
+import ProjectPermission from './ProjectPermission';
 import Project from './Project';
 import User from './User';
 
-export interface UserPermissionAttributes {
+export interface UserProjectPermissionAttributes {
   projectId: number;
   userId: number;
   permissionId: number;
 }
 
-interface UserPermissionAssociateModels {
+interface UserProjectPermissionAssociateModels {
   Project: ModelStatic<Project>;
   User: ModelStatic<User>;
-  Permission: ModelStatic<Permission>;
+  ProjectPermission: ModelStatic<ProjectPermission>;
 }
 
-class UserPermission extends Model {
+class UserProjectPermission extends Model {
   public projectId!: number;
   public userId!: number;
   public permissionId!: number;
@@ -25,30 +25,36 @@ class UserPermission extends Model {
 
   public readonly Project!: Project;
   public readonly User!: User;
-  public readonly Permission!: Permission;
+  public readonly ProjectPermission!: ProjectPermission;
   public static associations: {
     Project: BelongsTo;
     User: BelongsTo;
-    Permission: BelongsTo;
+    ProjectPermission: BelongsTo;
   };
 
-  public static associate(models: UserPermissionAssociateModels): void {
-    this.associations.Project = UserPermission.belongsTo(models.Project, {
-      foreignKey: 'projectId',
-      targetKey: 'id',
-    });
-    this.associations.User = UserPermission.belongsTo(models.User, {
+  public static associate(models: UserProjectPermissionAssociateModels): void {
+    this.associations.Project = UserProjectPermission.belongsTo(
+      models.Project,
+      {
+        foreignKey: 'projectId',
+        targetKey: 'id',
+      }
+    );
+    this.associations.User = UserProjectPermission.belongsTo(models.User, {
       foreignKey: 'userId',
       targetKey: 'id',
     });
-    this.associations.Permission = UserPermission.belongsTo(models.Permission, {
-      foreignKey: 'permissionId',
-      targetKey: 'id',
-    });
+    this.associations.ProjectPermission = UserProjectPermission.belongsTo(
+      models.ProjectPermission,
+      {
+        foreignKey: 'permissionId',
+        targetKey: 'id',
+      }
+    );
   }
 }
 
-UserPermission.init(
+UserProjectPermission.init(
   {
     projectId: {
       type: DataTypes.INTEGER.UNSIGNED,
@@ -67,9 +73,9 @@ UserPermission.init(
     },
   },
   {
-    tableName: 'user_permissions',
+    tableName: 'user_project_permissions',
     sequelize,
   }
 );
 
-export default UserPermission;
+export default UserProjectPermission;

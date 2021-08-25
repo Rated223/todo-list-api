@@ -1,4 +1,6 @@
-import Permission, { PermissionCreationAttributes } from './Permission';
+import Permission, {
+  ProjectPermissionCreationAttributes,
+} from './ProjectPermission';
 import setDatabase from '../tests/fixtures/setDatabase';
 import faker from 'faker';
 
@@ -7,10 +9,10 @@ beforeEach(async () => {
 });
 
 test('Should create 2 new permissions', async () => {
-  const newPermission1Data: PermissionCreationAttributes = {
+  const newPermission1Data: ProjectPermissionCreationAttributes = {
     description: faker.lorem.sentence(),
   };
-  const newPermission2Data: PermissionCreationAttributes = {
+  const newPermission2Data: ProjectPermissionCreationAttributes = {
     description: faker.lorem.sentence(),
   };
 

@@ -1,16 +1,16 @@
 import Company from './Company';
 import User from './User';
-import Permission from './Permission';
+import ProjectPermission from './ProjectPermission';
 import Project from './Project';
-import UserPermission from './UserPermission';
+import UserProjectPermission from './UserProjectPermission';
 
 Company.associate({ User, Project });
-User.associate({ Company, Permission, Project, UserPermission });
-Permission.associate({ User, Project, UserPermission });
-Project.associate({ User, Permission, Company, UserPermission });
-UserPermission.associate({ Project, User, Permission });
+User.associate({ Company, ProjectPermission, Project, UserProjectPermission });
+ProjectPermission.associate({ User, Project, UserProjectPermission });
+Project.associate({ User, ProjectPermission, Company, UserProjectPermission });
+UserProjectPermission.associate({ Project, User, ProjectPermission });
 
 User.addScopes();
 Project.addScopes();
 
-export { Company, User, Permission, Project, UserPermission };
+export { Company, User, ProjectPermission, Project, UserProjectPermission };
