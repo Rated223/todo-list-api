@@ -64,15 +64,15 @@ Company.init(
       allowNull: false,
     },
     email: {
-      type: DataTypes.STRING(30),
+      type: DataTypes.STRING(100),
       allowNull: false,
     },
     phone: {
-      type: DataTypes.STRING(30),
+      type: DataTypes.STRING(100),
       allowNull: true,
     },
     web: {
-      type: DataTypes.STRING(30),
+      type: DataTypes.STRING(100),
       allowNull: true,
     },
   },

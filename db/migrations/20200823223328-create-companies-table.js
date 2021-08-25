@@ -14,15 +14,15 @@ module.exports = {
         allowNull: false,
       },
       email: {
-        type: Sequelize.STRING(30),
+        type: Sequelize.STRING(100),
         allowNull: false,
       },
       phone: {
-        type: Sequelize.STRING(30),
+        type: Sequelize.STRING(100),
         allowNull: true,
       },
       web: {
-        type: Sequelize.STRING(30),
+        type: Sequelize.STRING(100),
         allowNull: true,
       },
       createdAt: {

@@ -31,20 +31,20 @@ module.exports = {
         defaultValue: 'NORMAL',
       },
       firstName: {
-        type: Sequelize.STRING(30),
+        type: Sequelize.STRING(100),
         allowNull: false,
       },
       lastName: {
-        type: Sequelize.STRING(30),
+        type: Sequelize.STRING(100),
         allowNull: false,
       },
       username: {
-        type: Sequelize.STRING(30),
+        type: Sequelize.STRING(100),
         allowNull: false,
         unique: true,
       },
       email: {
-        type: Sequelize.STRING(30),
+        type: Sequelize.STRING(100),
         allowNull: false,
         unique: true,
       },

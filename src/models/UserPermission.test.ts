@@ -49,7 +49,7 @@ test('Should assign a permission for a user', async () => {
   expect(permission1.get()).toMatchObject(newPermission.Permission.get());
 });
 
-test.only('Should remove a permission of a user', async () => {
+test('Should remove a permission of a user', async () => {
   const user = await User.scope('withProjects').findByPk(1);
 
   if (!user?.Projects || !user?.Projects[0].Permissions)
