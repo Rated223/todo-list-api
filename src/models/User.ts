@@ -17,6 +17,7 @@ import Project from './Project';
 import UserProjectPermission, {
   UserProjectPermissionAttributes,
 } from './UserProjectPermission';
+import CompanyPermission from './CompanyPermission';
 
 export type UserRoles = 'ADMIN' | 'NORMAL';
 
@@ -37,6 +38,7 @@ export interface UserCreationAttributes extends Optional<UserAttributes, 'id'> {
 
 interface UserAssociateModels {
   Company: ModelStatic<Company>;
+  CompanyPermission: ModelStatic<CompanyPermission>;
   Project: ModelStatic<Project>;
   ProjectPermission: ModelStatic<ProjectPermission>;
   UserProjectPermission: ModelStatic<UserProjectPermission>;
@@ -60,6 +62,7 @@ class User extends Model<UserAttributes, UserCreationAttributes>
   public readonly ProjectPermissions?: ProjectPermission[];
   public static associations: {
     Company: BelongsTo;
+    CompanyPermission: BelongsToMany;
     Projects: BelongsToMany;
     ProjectPermissions: BelongsToMany;
     UserProjectPermissions: HasMany;
@@ -70,6 +73,14 @@ class User extends Model<UserAttributes, UserCreationAttributes>
       foreignKey: 'companyId',
       targetKey: 'id',
     });
+    this.associations.CompanyPermission = User.belongsToMany(
+      models.CompanyPermission,
+      {
+        through: 'user_company_permissions',
+        foreignKey: 'userId',
+        otherKey: 'permissionId',
+      }
+    );
     this.associations.Projects = User.belongsToMany(models.Project, {
       through: { model: UserProjectPermission, unique: false },
       foreignKey: 'userId',

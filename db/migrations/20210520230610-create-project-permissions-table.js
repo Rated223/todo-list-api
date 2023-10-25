@@ -1,8 +1,18 @@
 'use strict';
 
+const tableName = 'project_permissions';
+const catalog = [
+  { description: 'See project' },
+  { description: 'Create issues' },
+  { description: 'Edit issues' },
+  { description: 'Delete issues' },
+  { description: 'Assign issue to user' },
+  { description: 'Make comments' },
+];
+
 module.exports = {
   up: async (queryInterface, Sequelize) => {
-    await queryInterface.createTable('project_permissions', {
+    await queryInterface.createTable(tableName, {
       id: {
         type: Sequelize.INTEGER.UNSIGNED,
         allowNull: false,
@@ -24,9 +34,11 @@ module.exports = {
         defaultValue: Sequelize.fn('now'),
       },
     });
+
+    await queryInterface.bulkInsert(tableName, catalog, {});
   },
 
   down: async (queryInterface) => {
-    await queryInterface.dropTable('project_permissions');
+    await queryInterface.dropTable(tableName);
   },
 };
